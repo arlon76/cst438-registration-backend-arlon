@@ -46,7 +46,8 @@ public class StudentController {
 		//Student student=studentRepository.save(rs);
 		
 		//return student;
-		return studentRepository.save(rs);
+		return studentRepository.save(rs);//that's it, in entirety - new student. it depends on the JSON 'student' sent in, parameter rs
+											//it also depends on autowired studentRepository, and the annotations PostMapping & Transactional.
 		//more leaps in progress: rs has the parameters, name works and db changed - this method became one line - not sure if that's right...
 	}
 	
