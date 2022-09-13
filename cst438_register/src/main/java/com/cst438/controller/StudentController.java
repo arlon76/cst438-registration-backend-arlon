@@ -43,14 +43,12 @@ public class StudentController {
 		Student student=studentRepository.save(s);
 		
 		return student;
-		//ok this is super wierd I've changed stuff and for some reason can't push.
+		
 		//this has had super progress: user arlon1 goes into the db here.
 		//in other words this does change the db but the info is hardcoded here,
 		//request parameters don't work yet. You can see they're there but...
 		//I'm doing something wrong with the parameters being sent in
 		//but this is a lot farther than I had it yesterday because the db is changed!
-		// I see what I was doing there's a passphrase AND a passWORD for ssh...
-		// No, I can't get it to push...
 	}
 	
 }
