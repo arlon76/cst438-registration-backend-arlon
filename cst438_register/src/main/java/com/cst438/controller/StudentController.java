@@ -18,6 +18,7 @@ public class StudentController {
 		
 		return "student id = 12398";
 	}
+	
 	//copied from schedule controller:
 	/* 
 	 * helper method to transform course, enrollment, student entities into 
