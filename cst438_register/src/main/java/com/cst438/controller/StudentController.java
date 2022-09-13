@@ -2,6 +2,7 @@ package com.cst438.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,7 +28,7 @@ public class StudentController {
 	
 	@PostMapping("/student")
 	@Transactional
-	public Student createNewStudent( @RequestBody Student rs) {
+	public Student createNewStudent( @RequestBody Student rs) throws Exception{
 
 		/*	String name = rs.getName(); // student's name
 		String student_email = rs.getEmail(); // student's email
@@ -46,8 +47,14 @@ public class StudentController {
 		//Student student=studentRepository.save(rs);
 		
 		//return student;
-		return studentRepository.save(rs);//that's it, in entirety - new student. it depends on the JSON 'student' sent in, parameter rs
+		Student potentiallyPreExistingStudent=studentRepository.findByEmail( rs.getEmail() );
+		if (potentiallyPreExistingStudent==null) {
+			return studentRepository.save(rs);//that's it, in entirety - new student. it depends on the JSON 'student' sent in, parameter rs
 											//it also depends on autowired studentRepository, and the annotations PostMapping & Transactional.
+		} else {
+			throw new Exception("Student email already exists "+rs.getEmail());
+		}
+		
 		//more leaps in progress: rs has the parameters, name works and db changed - this method became one line - not sure if that's right...
 	}
 	
