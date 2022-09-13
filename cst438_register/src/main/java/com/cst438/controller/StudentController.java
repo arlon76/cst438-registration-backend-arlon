@@ -28,18 +28,18 @@ public class StudentController {
 	
 	@PostMapping("/student")
 	@Transactional
-	public Student createNewStudent( @RequestBody Student rs) throws Exception{
+	public Student createNewStudent( @RequestBody Student rs) throws ResponseStatusException{
 					
 			//first check to make sure one's not already there:
 		Student potentiallyPreExistingStudent=studentRepository.findByEmail( rs.getEmail() );
 		if (potentiallyPreExistingStudent!=null) {	//there's already that email in the db
-			throw new Exception("Student email already exists "+rs.getEmail());
+			throw new ResponseStatusException( HttpStatus.BAD_REQUEST, "Student email already exists "+rs.getEmail());
 		}else if(rs.getName().isEmpty()){	//also check for empty parameters
-			throw new Exception("You have to put a name in");
+			throw new ResponseStatusException( HttpStatus.BAD_REQUEST, "You have to put a name in");
 		}else if(rs.getEmail().isEmpty()){
-			throw new Exception("You have to put an email in");
+			throw new ResponseStatusException( HttpStatus.BAD_REQUEST, "You have to put an email in");
 		}else if(rs.getStatus().isEmpty()){
-			throw new Exception("You have to put a status in");
+			throw new ResponseStatusException( HttpStatus.BAD_REQUEST, "You have to put a status in");
 		} else {
 			return studentRepository.save(rs);//that's it, in entirety - new student. it depends on the JSON 'student' sent in, parameter rs
 											//it also depends on autowired studentRepository, and the annotations PostMapping & Transactional.
