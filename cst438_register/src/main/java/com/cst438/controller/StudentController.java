@@ -29,30 +29,20 @@ public class StudentController {
 	@PostMapping("/student")
 	@Transactional
 	public Student createNewStudent( @RequestBody Student rs) throws Exception{
-
-		/*	String name = rs.getName(); // student's name
-		String student_email = rs.getEmail(); // student's email
-		int student_status_code = rs.getStatusCode();
-		String student_status = rs.getStatus();	*/
-		
-		/*	Student s=new Student();
-		s.setName(name);
-		s.setEmail(student_email);
-		s.setStatusCode(student_status_code);
-		s.setStatus(student_status);	*/
-		
-		//if (student!= null && course!=null && student.getStatusCode()==0) {
-
-		//Student student=studentRepository.save(s);
-		//Student student=studentRepository.save(rs);
-		
-		//return student;
+					
+			//first check to make sure one's not already there:
 		Student potentiallyPreExistingStudent=studentRepository.findByEmail( rs.getEmail() );
-		if (potentiallyPreExistingStudent==null) {
+		if (potentiallyPreExistingStudent!=null) {	//there's already that email in the db
+			throw new Exception("Student email already exists "+rs.getEmail());
+		}else if(rs.getName().isEmpty()){	//also check for empty parameters
+			throw new Exception("You have to put a name in");
+		}else if(rs.getEmail().isEmpty()){
+			throw new Exception("You have to put an email in");
+		}else if(rs.getStatus().isEmpty()){
+			throw new Exception("You have to put a status in");
+		} else {
 			return studentRepository.save(rs);//that's it, in entirety - new student. it depends on the JSON 'student' sent in, parameter rs
 											//it also depends on autowired studentRepository, and the annotations PostMapping & Transactional.
-		} else {
-			throw new Exception("Student email already exists "+rs.getEmail());
 		}
 		
 		//more leaps in progress: rs has the parameters, name works and db changed - this method became one line - not sure if that's right...
