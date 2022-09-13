@@ -30,7 +30,7 @@ public class StudentController {
 	@Transactional
 	public Student createNewStudent( @RequestBody Student rs) throws ResponseStatusException{
 					
-			//first check to make sure one's not already there:
+			//first check to make sure one's not already there and that the parameters aren't empty:
 		Student potentiallyPreExistingStudent=studentRepository.findByEmail( rs.getEmail() );
 		if (potentiallyPreExistingStudent!=null) {	//there's already that email in the db
 			throw new ResponseStatusException( HttpStatus.BAD_REQUEST, "Student email already exists "+rs.getEmail());
@@ -40,12 +40,13 @@ public class StudentController {
 			throw new ResponseStatusException( HttpStatus.BAD_REQUEST, "You have to put an email in");
 		}else if(rs.getStatus().isEmpty()){
 			throw new ResponseStatusException( HttpStatus.BAD_REQUEST, "You have to put a status in");
-		} else {
-			return studentRepository.save(rs);//that's it, in entirety - new student. it depends on the JSON 'student' sent in, parameter rs
-											//it also depends on autowired studentRepository, and the annotations PostMapping & Transactional.
+		} else {	// if everything checks out, save to db:
+			return studentRepository.save(rs);//new student. it depends on the JSON 'student' sent in, parameter rs
+											//it also depends on autowired studentRepository, and the annotations 
+												//PostMapping & Transactional. It checks the email isn't already
+												//present in the db and that the parameters aren't empty.
 		}
 		
-		//more leaps in progress: rs has the parameters, name works and db changed - this method became one line - not sure if that's right...
 	}
 	
 }
