@@ -29,22 +29,25 @@ public class StudentController {
 	@Transactional
 	public Student createNewStudent( @RequestBody Student rs) {
 
-		String name = rs.getName(); // student's name
-		String student_email = "test@csumb.edu"; // student's email
-		int student_status_code = 0;
+		/*	String name = rs.getName(); // student's name
+		String student_email = rs.getEmail(); // student's email
+		int student_status_code = rs.getStatusCode();
+		String student_status = rs.getStatus();	*/
 		
-		Student s=new Student();
+		/*	Student s=new Student();
 		s.setName(name);
 		s.setEmail(student_email);
 		s.setStatusCode(student_status_code);
+		s.setStatus(student_status);	*/
 		
 		//if (student!= null && course!=null && student.getStatusCode()==0) {
 
-		Student student=studentRepository.save(s);
+		//Student student=studentRepository.save(s);
+		//Student student=studentRepository.save(rs);
 		
-		return student;
-		
-		//leaps in progress: rs has the parameters, name works and db changed
+		//return student;
+		return studentRepository.save(rs);
+		//more leaps in progress: rs has the parameters, name works and db changed - this method became one line - not sure if that's right...
 	}
 	
 }
