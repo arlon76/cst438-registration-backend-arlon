@@ -27,9 +27,9 @@ public class StudentController {
 	
 	@PostMapping("/student")
 	@Transactional
-	public Student createNewStudent( /* @RequestParam("name") String name*/) {
+	public Student createNewStudent( @RequestBody Student rs) {
 
-		String name = "arlon2"; // student's email
+		String name = rs.getName(); // student's name
 		String student_email = "test@csumb.edu"; // student's email
 		int student_status_code = 0;
 		
@@ -44,11 +44,7 @@ public class StudentController {
 		
 		return student;
 		
-		//this has had super progress: user arlon1 goes into the db here.
-		//in other words this does change the db but the info is hardcoded here,
-		//request parameters don't work yet. You can see they're there but...
-		//I'm doing something wrong with the parameters being sent in
-		//but this is a lot farther than I had it yesterday because the db is changed!
+		//leaps in progress: rs has the parameters, name works and db changed
 	}
 	
 }
