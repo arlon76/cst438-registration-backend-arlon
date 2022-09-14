@@ -3,17 +3,22 @@
  * */
 package com.cst438.controller;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.cst438.domain.Enrollment;
+import com.cst438.domain.ScheduleDTO;
 import com.cst438.domain.Student;
 import com.cst438.domain.StudentDTO;
 import com.cst438.domain.StudentRepository;
@@ -90,4 +95,21 @@ public class StudentController {
 			//return null;			
 		}
 	}
+	
+	/*
+	 * get student.
+	 */
+	@GetMapping("/student")
+	public Student getStudent( @RequestParam("id") int id ) {
+		System.out.println("/student called.");
+		Optional<Student> optionalStudent = studentRepository.findById(id);
+		if (optionalStudent.isPresent()) {	Student student=optionalStudent.get();
+			System.out.println("/student "+student.getName()+" "+student.getStudent_id());
+			return student;
+		} else {
+			System.out.println("/student "+id+" not found. ");
+			throw new ResponseStatusException( HttpStatus.BAD_REQUEST, "Student not found. " );
+		}
+	}
+	
 }
