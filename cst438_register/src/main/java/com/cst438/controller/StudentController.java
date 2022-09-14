@@ -21,6 +21,7 @@ import com.cst438.domain.CourseDTOG;
 import com.cst438.domain.Enrollment;
 import com.cst438.domain.ScheduleDTO;
 import com.cst438.domain.Student;
+import com.cst438.domain.StudentDTO;
 import com.cst438.domain.StudentRepository;
 
 @RestController
@@ -51,22 +52,47 @@ public class StudentController {
 		}
 
 	}
-	
-	@PatchMapping("/student/{student_id}")
+
+	//@PatchMapping("/student/{student_id}")
+	//@PutMapping("/student")
+	@PatchMapping("/student")
 	@Transactional
 	public void updateStudentStatus(
-			@RequestBody Student rs
-			,  @PathVariable int student_id
-			, @RequestParam("status_code") int status_code /**/
+		/*		@RequestBody Student rs*/
+			@RequestBody StudentDTO rs
+			/*,  @PathVariable int student_id
+			, @RequestParam("status_code") int status_code */
 	) {
-		Optional<Student> student = studentRepository.findById(student_id);
-		System.out.println("Line 63 StudentController.java says student_id:"
-						+student_id
-						+", rs.student_id:"+rs.getStudent_id()
-						+", status_code:"+status_code
-						+", rs.getStatusCode:"+rs.getStatusCode()/**/
-						);//works!
-		rs.setStatusCode(status_code);//I'm trying actually to send it through in rs but..not working yet..this works though
+		//Optional<Student> student = studentRepository.findById(student_id);
+		//Optional<Student> student = studentRepository.findById(rs.getStudent_id());
+		Optional<Student> optionalStudent = studentRepository.findById(rs.student_id);
+		optionalStudent.ifPresentOrElse(student->{
+				
+			System.out.println("Line 71 StudentController.java says student_id:"
+					/*				+student_id	*/
+					/*			+", rs.student_id:"+rs.getStudent_id()*/
+				+", rs.student_id:"+rs.student_id
+					/*		+", status_code:"+status_code	*/
+				/*		+", rs.getStatusCode:"+rs.getStatusCode()*//**/
+				+", rs.getStatusCode:"+rs.statusCode	
+							);//works!
+				
+			student.setStatusCode(rs.statusCode);
+				
+			studentRepository.save(student);
+		}
+		,()->{
+			System.out.println("Line 85 StudentController.java says student not in db yet "
+					/*				+student_id	*/
+					/*			+", rs.student_id:"+rs.getStudent_id()*/
+				+", rs.student_id:"+rs.student_id
+					/*		+", status_code:"+status_code	*/
+				/*		+", rs.getStatusCode:"+rs.getStatusCode()*//**/
+				+", rs.getStatusCode:"+rs.statusCode	
+							);//works!			
+		});
+
+		//rs.setStatusCode(status_code);//I'm trying actually to send it through in rs but..not working yet..this works though
 		//problem is I'm putting user id in two places, the url and the request body - I know that's wrong - it's a working hack
 		//student.setStatusCode(status_code);//this is probably not necessary
 		//return 
