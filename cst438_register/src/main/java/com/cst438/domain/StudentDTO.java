@@ -45,5 +45,9 @@ public class StudentDTO{
 	public void setStatus(String status) {
 		this.status = status;
 	}
-	
+	@Override
+	public String toString() {
+		return "StudentDTO: [student_id=" + student_id + ", name=" + name + ", email=" + email + ", statusCode="
+				+ statusCode + ", status=" + status + "]";
+	}
 }

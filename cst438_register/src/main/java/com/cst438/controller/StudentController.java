@@ -44,11 +44,23 @@ public class StudentController {
 	@PostMapping("/student")
 	@Transactional
 	public Student createNewStudent( @RequestBody StudentDTO rs) throws ResponseStatusException {
-					
+			
+		System.out.println("Line 48 StudentController.java reporting createNewStudent is running. "
+					+"Request included student name: "+rs.getName()
+					+", email: "+rs.getEmail()
+					+", status: "+rs.getStatus()
+					+", statusCode: "+rs.getStatusCode()
+					+", id: "+rs.getStudent_id()
+				);
+		
 			//first check to make sure one's not already there and that the parameters aren't empty:
 		Student potentiallyPreExistingStudent=studentRepository.findByEmail( rs.getEmail() );
 		if (potentiallyPreExistingStudent!=null) {	//there's already that email in the db
-			throw new ResponseStatusException( HttpStatus.BAD_REQUEST, "Student email already exists "+rs.getEmail());
+			
+				System.out.println("Line 60 StudentController.java email already present: ");
+				System.out.println(potentiallyPreExistingStudent);
+			
+			throw new ResponseStatusException( HttpStatus.BAD_REQUEST, "Line 68 StudentController.java says: Student email already exists "+rs.getEmail());
 		}else if(rs.getName().isEmpty()){	//also check for empty parameters
 			throw new ResponseStatusException( HttpStatus.BAD_REQUEST, "You have to put a name in");
 		}else if(rs.getEmail().isEmpty()){
@@ -56,13 +68,27 @@ public class StudentController {
 		}else if(rs.getStatus().isEmpty()){
 			throw new ResponseStatusException( HttpStatus.BAD_REQUEST, "You have to put a status in");
 		} else {	// if everything checks out, save to db:
+			System.out.println("Line 71 StudentController.java reporting about to create and save a new student with:");
+			System.out.println(rs);
 			Student s=new Student();
 			s.setName(rs.getName());s.setEmail(rs.getEmail());s.setStatus(rs.getStatus());s.setStatusCode(rs.getStatusCode());
+			System.out.println("Line 75 StudentController.java reporting, created: ");
+			System.out.println(s);
+			System.out.println("Line 77 about to save a new student...");
 			
-			return studentRepository.save(s);//new student. it depends on the JSON 'student' sent in, parameter rs
+			Student saved = studentRepository.save(s);//new student. it depends on the JSON 'student' sent in, parameter rs
 											//it also depends on autowired studentRepository, and the annotations 
 												//PostMapping & Transactional. It checks the email isn't already
 													//present in the db and that the parameters aren't empty.
+			
+			System.out.println("Line 78 StudentController.java reporting createNewStudent is returning: "
+					+"student name: "+saved.getName()
+					+", email: "+saved.getEmail()
+					+", status: "+saved.getStatus()
+					+", statusCode: "+saved.getStatusCode()
+					+", id: "+saved.getStudent_id()
+				);		
+			return saved;
 		}
 	}
 	
