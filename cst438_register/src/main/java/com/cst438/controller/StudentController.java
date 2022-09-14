@@ -1,38 +1,41 @@
 package com.cst438.controller;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.cst438.domain.Course;
-import com.cst438.domain.CourseDTOG;
-import com.cst438.domain.Enrollment;
-import com.cst438.domain.ScheduleDTO;
 import com.cst438.domain.Student;
 import com.cst438.domain.StudentDTO;
 import com.cst438.domain.StudentRepository;
 
+/*	Student controller with working createNewStudent and updateStudentStatusCode
+ * 
+ * */
 @RestController
 public class StudentController {
 	
 	@Autowired
 	StudentRepository studentRepository;
 	
+	/*	Create New Student works, just send a Post request with the student_id and new statusCode
+	 *	like:														to http://localhost:8080/student
+	 *			{	"name":"New Guy"
+	 *				,"email":"aasdfsdf@asdf.asd2f22f"
+	 *				,"statusCode":0
+	 *				,"status":"smart"
+	 *			}
+	 * 		if the email is in the database or if the fields are empty, it throws an exception.
+	 * */
 	@PostMapping("/student")
 	@Transactional
-	public Student createNewStudent( @RequestBody StudentDTO rs) throws ResponseStatusException{
+	public Student createNewStudent( @RequestBody StudentDTO rs) throws ResponseStatusException {
 					
 			//first check to make sure one's not already there and that the parameters aren't empty:
 		Student potentiallyPreExistingStudent=studentRepository.findByEmail( rs.getEmail() );
@@ -53,32 +56,35 @@ public class StudentController {
 												//PostMapping & Transactional. It checks the email isn't already
 													//present in the db and that the parameters aren't empty.
 		}
-
 	}
-
+	
+	/*	Update Student Status Code works, just send a Patch request with the student_id and new statusCode
+	 *	like:														to http://localhost:8080/student
+	 *			{"student_id":222,"statusCode":92}
+	 * 		if the id's not in the database it throws an exception.
+	 * */
 	@PatchMapping("/student")
 	@Transactional
-	public Student updateStudentStatus(
-			@RequestBody StudentDTO rs
-	) {
+	public Student updateStudentStatusCode(	@RequestBody StudentDTO rs) throws ResponseStatusException {	
 		Optional<Student> optionalStudent = studentRepository.findById(rs.getStudent_id());
-		if(optionalStudent.isPresent()){
-			Student student=optionalStudent.get();			
-			System.out.println("Line 71 StudentController.java says:"
+		optionalStudent.ifPresentOrElse(student->{	/*	there is a student with that ID	*/
+					},()->{	/*	no student by that ID yet*/	});//how to return from that...instead:	
+		if(optionalStudent.isPresent()){	//there's a student with that ID
+			Student student=optionalStudent.get();
+				System.out.println("Line 58 StudentController.java says:"
 								+", rs.student_id:"+rs.getStudent_id()
 						+", rs.getStatusCode:"+rs.getStatusCode()
-			);//works!
+				);//works!
 			student.setStatusCode(rs.getStatusCode());
 			Student dbstudent=studentRepository.save(student);
-			return dbstudent;
-			
-		}else {
-			System.out.println("Line 85 StudentController.java says student not in db yet "
+			return dbstudent;				
+		}else {	/*	no student by that ID */
+				System.out.println("Line 67 StudentController.java says that student id is not in the db yet "
 								+", rs.student_id:"+rs.getStudent_id()
 						+", rs.getStatusCode:"+rs.getStatusCode()
-			);//works!
-			return null;			
+				);//works!
+			throw new ResponseStatusException( HttpStatus.BAD_REQUEST, "There's no student with that id ("+rs.getStudent_id()+")");
+			//return null;			
 		}
-		//optionalStudent.isPresentOrElse(student->{},()->{});
 	}
 }
