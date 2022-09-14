@@ -52,12 +52,34 @@ public class StudentController {
 
 	}
 	
-	@PatchMapping("/student/{student_id}/{status_code}")
+	@PatchMapping("/student/{student_id}")
 	@Transactional
-	public void updateStudentStatus( @PathVariable int student_id, @PathVariable int status_code ) {
-		
-		//System.out.println("Line 59 StudentController.java says student_id:"+student_id+", status_code:"+status_code);//works!
-		
+	public void updateStudentStatus(
+			@RequestBody Student rs
+			,  @PathVariable int student_id
+			, @RequestParam("status_code") int status_code /**/
+	) {
+		Optional<Student> student = studentRepository.findById(student_id);
+		System.out.println("Line 63 StudentController.java says student_id:"
+						+student_id
+						+", rs.student_id:"+rs.getStudent_id()
+						+", status_code:"+status_code
+						+", rs.getStatusCode:"+rs.getStatusCode()/**/
+						);//works!
+		rs.setStatusCode(status_code);//I'm trying actually to send it through in rs but..not working yet..this works though
+		//problem is I'm putting user id in two places, the url and the request body - I know that's wrong - it's a working hack
+		//student.setStatusCode(status_code);//this is probably not necessary
+		//return 
+				//studentRepository.save(rs);
+		/*Um, nevermind, I think I did this all wrong:
+		 * What happens in the database when a student's registration is on hold (referring to stories required in assignment 2 for registration section) ?
+
+David Wisneski
+5:59pmSep 13 at 5:59pm
+If you look at code in the addCourse method in the Schedule controller,  if the status is not 0, then the student is not allowed to add a new Course to their schedule
+...or did I? No, I guess not, not really, just trying to update the status code: student.getStatusCode()==0 line 80 scheduleCtlr.
+		 * this is what I'm working on now
+		 * */
 		
 	}
 
