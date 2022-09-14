@@ -32,7 +32,7 @@ public class StudentController {
 	
 	@PostMapping("/student")
 	@Transactional
-	public Student createNewStudent( @RequestBody Student rs) throws ResponseStatusException{
+	public Student createNewStudent( @RequestBody StudentDTO rs) throws ResponseStatusException{
 					
 			//first check to make sure one's not already there and that the parameters aren't empty:
 		Student potentiallyPreExistingStudent=studentRepository.findByEmail( rs.getEmail() );
@@ -45,7 +45,10 @@ public class StudentController {
 		}else if(rs.getStatus().isEmpty()){
 			throw new ResponseStatusException( HttpStatus.BAD_REQUEST, "You have to put a status in");
 		} else {	// if everything checks out, save to db:
-			return studentRepository.save(rs);//new student. it depends on the JSON 'student' sent in, parameter rs
+			Student s=new Student();
+			s.setName(rs.getName());s.setEmail(rs.getEmail());s.setStatus(rs.getStatus());s.setStatusCode(rs.getStatusCode());
+			
+			return studentRepository.save(s);//new student. it depends on the JSON 'student' sent in, parameter rs
 											//it also depends on autowired studentRepository, and the annotations 
 												//PostMapping & Transactional. It checks the email isn't already
 													//present in the db and that the parameters aren't empty.
@@ -53,61 +56,29 @@ public class StudentController {
 
 	}
 
-	//@PatchMapping("/student/{student_id}")
-	//@PutMapping("/student")
 	@PatchMapping("/student")
 	@Transactional
-	public void updateStudentStatus(
-		/*		@RequestBody Student rs*/
+	public Student updateStudentStatus(
 			@RequestBody StudentDTO rs
-			/*,  @PathVariable int student_id
-			, @RequestParam("status_code") int status_code */
 	) {
-		//Optional<Student> student = studentRepository.findById(student_id);
-		//Optional<Student> student = studentRepository.findById(rs.getStudent_id());
-		Optional<Student> optionalStudent = studentRepository.findById(rs.student_id);
-		optionalStudent.ifPresentOrElse(student->{
-				
-			System.out.println("Line 71 StudentController.java says student_id:"
-					/*				+student_id	*/
-					/*			+", rs.student_id:"+rs.getStudent_id()*/
-				+", rs.student_id:"+rs.student_id
-					/*		+", status_code:"+status_code	*/
-				/*		+", rs.getStatusCode:"+rs.getStatusCode()*//**/
-				+", rs.getStatusCode:"+rs.statusCode	
-							);//works!
-				
-			student.setStatusCode(rs.statusCode);
-				
-			studentRepository.save(student);
-		}
-		,()->{
+		Optional<Student> optionalStudent = studentRepository.findById(rs.getStudent_id());
+		if(optionalStudent.isPresent()){
+			Student student=optionalStudent.get();			
+			System.out.println("Line 71 StudentController.java says:"
+								+", rs.student_id:"+rs.getStudent_id()
+						+", rs.getStatusCode:"+rs.getStatusCode()
+			);//works!
+			student.setStatusCode(rs.getStatusCode());
+			Student dbstudent=studentRepository.save(student);
+			return dbstudent;
+			
+		}else {
 			System.out.println("Line 85 StudentController.java says student not in db yet "
-					/*				+student_id	*/
-					/*			+", rs.student_id:"+rs.getStudent_id()*/
-				+", rs.student_id:"+rs.student_id
-					/*		+", status_code:"+status_code	*/
-				/*		+", rs.getStatusCode:"+rs.getStatusCode()*//**/
-				+", rs.getStatusCode:"+rs.statusCode	
-							);//works!			
-		});
-
-		//rs.setStatusCode(status_code);//I'm trying actually to send it through in rs but..not working yet..this works though
-		//problem is I'm putting user id in two places, the url and the request body - I know that's wrong - it's a working hack
-		//student.setStatusCode(status_code);//this is probably not necessary
-		//return 
-				//studentRepository.save(rs);
-		/*Um, nevermind, I think I did this all wrong:
-		 * What happens in the database when a student's registration is on hold (referring to stories required in assignment 2 for registration section) ?
-
-David Wisneski
-5:59pmSep 13 at 5:59pm
-If you look at code in the addCourse method in the Schedule controller,  if the status is not 0, then the student is not allowed to add a new Course to their schedule
-...or did I? No, I guess not, not really, just trying to update the status code: student.getStatusCode()==0 line 80 scheduleCtlr.
-		 * this is what I'm working on now
-		 * */
-		
+								+", rs.student_id:"+rs.getStudent_id()
+						+", rs.getStatusCode:"+rs.getStatusCode()
+			);//works!
+			return null;			
+		}
+		//optionalStudent.isPresentOrElse(student->{},()->{});
 	}
-
-	
 }
