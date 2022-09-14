@@ -1,3 +1,6 @@
+/**		StudentController
+ * 
+ * */
 package com.cst438.controller;
 
 import java.util.Optional;
@@ -14,17 +17,17 @@ import org.springframework.web.server.ResponseStatusException;
 import com.cst438.domain.Student;
 import com.cst438.domain.StudentDTO;
 import com.cst438.domain.StudentRepository;
-
-/*	Student controller with working createNewStudent and updateStudentStatusCode
- * 
- * */
+/**	Student controller with working createNewStudent and updateStudentStatusCode
+ * @author arlon
+ *
+ */
 @RestController
 public class StudentController {
 	
 	@Autowired
 	StudentRepository studentRepository;
 	
-	/*	Create New Student works, just send a Post request with the student_id and new statusCode
+	/**	Create New Student works, just send a Post request with the student_id and new statusCode
 	 *	like:														to http://localhost:8080/student
 	 *			{	"name":"New Guy"
 	 *				,"email":"aasdfsdf@asdf.asd2f22f"
@@ -58,7 +61,7 @@ public class StudentController {
 		}
 	}
 	
-	/*	Update Student Status Code works, just send a Patch request with the student_id and new statusCode
+	/**	Update Student Status Code works, just send a Patch request with the student_id and new statusCode
 	 *	like:														to http://localhost:8080/student
 	 *			{"student_id":222,"statusCode":92}
 	 * 		if the id's not in the database it throws an exception.
