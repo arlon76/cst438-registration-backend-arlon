@@ -105,12 +105,14 @@ public class StudentController {
 					},()->{	/*	no student by that ID yet*/	});//how to return from that...instead:	
 		if(optionalStudent.isPresent()){	//there's a student with that ID
 			Student student=optionalStudent.get();
-				System.out.println("Line 58 StudentController.java says:"
+				System.out.println("Line 108 StudentController.java says:"
 								+", rs.student_id:"+rs.getStudent_id()
-						+", rs.getStatusCode:"+rs.getStatusCode()
+								+", rs.getStatusCode:"+rs.getStatusCode()
+								+", student.getStatusCode:"+student.getStatusCode()
 				);//works!
 			student.setStatusCode(rs.getStatusCode());
 			Student dbstudent=studentRepository.save(student);
+			System.out.println("Line 114 StudentController.java returning db student:");System.out.println(dbstudent);
 			return dbstudent;				
 		}else {	/*	no student by that ID */
 				System.out.println("Line 67 StudentController.java says that student id is not in the db yet "

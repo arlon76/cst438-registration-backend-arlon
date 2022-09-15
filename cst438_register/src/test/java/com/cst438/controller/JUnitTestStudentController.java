@@ -82,7 +82,7 @@ public class JUnitTestStudentController {
 
 		MockHttpServletResponse response;
 
-		System.out.println("Line 85 JUnitTestStudentController.java starting - what happens, right? (Arlon wants to know what happens)");
+		System.out.println("Line 85 JUnitTestStudentController.java starting ...");
 		
 		Student student = new Student();		
 		student.setEmail(TEST_STUDENT_EMAIL);
@@ -91,7 +91,7 @@ public class JUnitTestStudentController {
 		student.setStatus(TEST_STUDENT_STATUS);
 		student.setStudent_id(TEST_STUDENT_ID);			//ok so there's a new student with these characteristics. Lets print it out:
 		
-		System.out.println("Line 93 JUnitTestStudentController.java created a new 'Student' with these characteristics:"
+		System.out.println("Line 94 JUnitTestStudentController.java created a new 'Student' with these characteristics:"
 				+" name: "+student.getName()
 				+" id: "+student.getStudent_id()
 				+" Email: "+student.getEmail()
@@ -104,13 +104,8 @@ public class JUnitTestStudentController {
 	   given(studentRepository.findByEmail(TEST_STUDENT_EMAIL)).willReturn(null);//causing the email to be already found. So it's a working line.
 	   given(studentRepository.save(any())).willReturn(student);//denotes the answer
 	   given(studentRepository.findById(TEST_STUDENT_ID)).willReturn(Optional.ofNullable(student));//denotes the answer
-	//I don't understand this line yet. At all. One question I have is, does createNewStudent in StudentController happen?
-	    //no, doesn't look like it. So how does this work then?
-	    //one thing I'm seeing is that what this line says, the other file does. like, the other file is returning email found,
-	    //even when it's not, except here. maybe if I comment it out.
-	    //as commented out - I did that because it's causing the email to be already found. So it's a working line.
-	    //after reading mockito when/then I think what it does is short-circuit that method, giving it its return value.
-	    
+	   	//these lines short-circuit the actual method calls reference here, telling them what the answer is, feeding it back
+	   
 	    // create the DTO (data transfer object) for the student to add.  primary key course_id is 0.
 	    StudentDTO studentDTO = new StudentDTO();
 	    studentDTO.setStudent_id(TEST_STUDENT_ID);
@@ -129,40 +124,36 @@ public class JUnitTestStudentController {
 			      .accept(MediaType.APPLICATION_JSON))
 				.andReturn().getResponse();
 		//this DOES call the original method. Data printed is what's here.
-		//test 1 passed. And that student was not added to the db even though I know from testing with postman
-		//that the regular method does work. So what has this done so far? 
-		//well it verifies asJsonString works, it verifies the original method gets called, it uses this data
-		//
+		//That student was not added to the db, even though I know from testing with postman
+		//that the regular method does work. 
 
-			//this is 400 and it says because the email was already added.
 		// verify that return status = OK (value 200) 
 			assertEquals(200, response.getStatus());
 			//that was from the given line, above
 
-		
-		//it's not, it's choking, on the save line for some reason.
-		//I saw in the book to use the @AutoConfigureTestDatabase annotation but it didn't say where or how to use it.
-		
-		//sort of stuck here with these questions:
-			//not sure of the objective here
-			//	I know I'm testing createNewStudent, and it's already proved some peripheral aspects of it, but
-			//this currently chokes on the save line in the real file.
-			//it doesn't go past that line (per print statements in that file)
-			// it does fine with postman testing the file - the feature works in other words - this test file doesn't
-		//it causes that other file to choke.
-		//so this next line, check the result - the result is that that method chokes and doesnt return anything
+			//	So far it's already proved some peripheral aspects of it the other file
+			//it verifies asJsonString works, it verifies the original method gets called, it uses this data
+			//until I added the given/save line 105 above it choked on the save line in the real file.
+			//before the matching given it wouldn't go past that line (per print statements in that file)
+			// I could see it working with postman testing the file - the feature works, in other words - 
+			//	but this test file wouldn't (does now)
+
 		//reminder: I did change pom.xml like the book says to add h2...didn't help
+		//I saw in the book to use the @AutoConfigureTestDatabase annotation but it didn't say where or how to use it.
 			
 		// verify that returned data has non zero primary key
 		Student result = fromJsonString(response.getContentAsString(), Student.class);
 		assertNotEquals( 0  , result.getStudent_id());
 		
 		// verify that repository save method was called.
-		verify(studentRepository).save(any(Student.class));
-
+		verify(studentRepository, times(1)).save(any(Student.class));
 		
 		// verify that returned data contains the added student 
 		Student rstudent = fromJsonString(response.getContentAsString(), Student.class);
+		assertEquals( rstudent.getName()  , studentDTO.getName());
+		assertEquals( rstudent.getEmail()  , studentDTO.getEmail());
+		assertEquals( rstudent.getStatus()  , studentDTO.getStatus());
+		assertEquals( rstudent.getStatusCode()  , studentDTO.getStatusCode());
 /*			boolean found = false;		
 		//for (Student s : scheduleDTO.courses) {
 			if (rstudent.getStudent_id() == TEST_STUDENT_ID) {
@@ -170,12 +161,12 @@ public class JUnitTestStudentController {
 			}
 		// }
 		assertEquals(true, found, "Added student not in db.");
-		// verify that repository find method was called.
-		verify(studentRepository, times(1)).findByEmail(TEST_STUDENT_EMAIL);
 	*/
 		
+		// verify that repository find method was called.
+		verify(studentRepository, times(1)).findByEmail(TEST_STUDENT_EMAIL);
 		
-		//now say it's there already, same test, but with a 400:
+		//now say it's there already, same test, but with a 400, because the email was already added:
 		given(studentRepository.findByEmail(TEST_STUDENT_EMAIL)).willReturn(student);//causing the email to be already found. So it's a working line.
 		response = mvc.perform(
 				MockMvcRequestBuilders
@@ -186,6 +177,7 @@ public class JUnitTestStudentController {
 			.andReturn().getResponse();
 		assertEquals(400, response.getStatus());
 		//that was from the given line, above
+		verify(studentRepository, times(1)).findByEmail(TEST_STUDENT_EMAIL);
 			
 		// do http GET for student 
 		response = mvc.perform(
@@ -195,7 +187,109 @@ public class JUnitTestStudentController {
 				.andReturn().getResponse();
 
 		// verify that return status = OK (value 200) 
-		assertEquals(200, response.getStatus());		
+		assertEquals(200, response.getStatus());
+		
+	}
+	@Test
+	public void updateStudentStatusCode()  throws Exception {
+		MockHttpServletResponse response;
+
+		System.out.println("Line 197 JUnitTestStudentController.java starting...");
+		
+		Student student = new Student();		
+		student.setEmail(TEST_STUDENT_EMAIL);
+		student.setName(TEST_STUDENT_NAME);
+		student.setStatusCode(TEST_STUDENT_STATUS_CODE);
+		student.setStatus(TEST_STUDENT_STATUS);
+		student.setStudent_id(TEST_STUDENT_ID);	// a new student with these characteristics. Print it out:
+		
+		Student updatedStudent = new Student();		
+		updatedStudent.setEmail(TEST_STUDENT_EMAIL);
+		updatedStudent.setName(TEST_STUDENT_NAME);
+		updatedStudent.setStatusCode(TEST_STUDENT_STATUS_CODE+1);///////+1 for studentDTO and updatedStudent's status codes
+		updatedStudent.setStatus(TEST_STUDENT_STATUS);
+		updatedStudent.setStudent_id(TEST_STUDENT_ID);	// a new student with these characteristics. Print it out:
+		
+		
+		
+		System.out.println("Line 215 JUnitTestStudentController.java created a new 'Student' with these characteristics:"
+				+" name: "+student.getName()
+				+" id: "+student.getStudent_id()
+				+" Email: "+student.getEmail()
+				+" StatusCode: "+student.getStatusCode()
+				+" Status: "+student.getStatus()
+			);
+		
+	// given  -- stubs for database repositories that return test data
+//		   given(studentRepository.findByEmail(TEST_STUDENT_EMAIL)).willReturn(student);//causing the email to be already found. So it's a working line.
+	   //given(studentRepository.findByEmail(TEST_STUDENT_EMAIL)).willReturn(null);//causing the email to be already found. So it's a working line.
+	   given(studentRepository.save(any())).willReturn(updatedStudent);//denotes the answer
+	   given(studentRepository.findById(TEST_STUDENT_ID)).willReturn(Optional.ofNullable(student));//denotes the answer
+	   	//these lines short-circuit the actual method calls reference here, telling them what the answer is, feeding it back
+	   
+	    // create the DTO (data transfer object) for the student to add.  primary key course_id is 0.
+	    StudentDTO studentDTO = new StudentDTO();
+	    studentDTO.setStudent_id(TEST_STUDENT_ID);
+	    studentDTO.setName(TEST_STUDENT_NAME);
+	    studentDTO.setEmail(TEST_STUDENT_EMAIL);
+	    studentDTO.setStatus(TEST_STUDENT_STATUS);
+	    studentDTO.setStatusCode(TEST_STUDENT_STATUS_CODE+1);///////+1 for studentDTO and updatedStudent's status codes
+	    	//thats the same thing again but in DTO form. I don't at all understand where this is going.
+  				
+		// then do an http post request with body of studentDTO as JSON
+		response = mvc.perform(
+				MockMvcRequestBuilders
+			      .patch("/student")
+			      .content(asJsonString(studentDTO/*which has status code +1, like updatedStudent*/))
+			      .contentType(MediaType.APPLICATION_JSON)
+			      .accept(MediaType.APPLICATION_JSON))
+				.andReturn().getResponse();
+		//this DOES call the original method. Data printed is what's here.
+		//That student was not added to the db, I know from testing with postman that the regular method does work. 
+
+		// verify that return status = OK (value 200) 
+			assertEquals(200, response.getStatus());
+			//that was from the given line, above
+
+		// verify that returned data has non zero primary key
+		Student result = fromJsonString(response.getContentAsString(), Student.class);
+		assertNotEquals( 0  , result.getStudent_id());
+		assertEquals(TEST_STUDENT_STATUS_CODE+1  , result.getStatusCode());
+		
+		// verify that repository save method was called.
+		verify(studentRepository, times(1)).save(any(Student.class));
+		
+		// verify that returned data contains the updated student 
+		Student rstudent = fromJsonString(response.getContentAsString(), Student.class);
+		assertEquals( rstudent.getName()  , studentDTO.getName());
+		assertEquals( rstudent.getEmail()  , studentDTO.getEmail());
+		assertEquals( rstudent.getStatus()  , studentDTO.getStatus());
+		assertEquals( rstudent.getStatusCode()  , studentDTO.getStatusCode());
+/*			boolean found = false;		
+		//for (Student s : scheduleDTO.courses) {
+			if (rstudent.getStudent_id() == TEST_STUDENT_ID) {
+				found = true;
+			}
+		// }
+		assertEquals(true, found, "Added student not in db.");
+	*/
+		
+		// verify that repository find method was called.
+		//verify(studentRepository, times(1)).findByEmail(TEST_STUDENT_EMAIL);
+		
+		//now say it's not in the db, so same but with a 400, because the id isn't there:
+		given(studentRepository.findById(TEST_STUDENT_ID)).willReturn(null);//causing the student to be not added yet.
+		response = mvc.perform(
+				MockMvcRequestBuilders
+			      .patch("/student")
+			   /*   .content(asJsonString(studentDTO))*/	
+			      .contentType(MediaType.APPLICATION_JSON)
+			   /*   .accept(MediaType.APPLICATION_JSON)	*/		)
+			.andReturn().getResponse();
+		assertEquals(400, response.getStatus());
+		//that was from the given line, above
+		verify(studentRepository, times(1)).findById(TEST_STUDENT_ID);
+		
 		
 	}
 	private static String asJsonString(final Object obj) {
