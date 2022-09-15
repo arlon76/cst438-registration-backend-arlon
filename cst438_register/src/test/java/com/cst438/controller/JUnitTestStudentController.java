@@ -99,8 +99,11 @@ public class JUnitTestStudentController {
 				+" Status: "+student.getStatus()
 			);
 		
-		// given  -- stubs for database repositories that return test data
-	    given(studentRepository.findByEmail(TEST_STUDENT_EMAIL)).willReturn(student);//causing the email to be already found. So it's a working line.
+	// given  -- stubs for database repositories that return test data
+//		   given(studentRepository.findByEmail(TEST_STUDENT_EMAIL)).willReturn(student);//causing the email to be already found. So it's a working line.
+	   given(studentRepository.findByEmail(TEST_STUDENT_EMAIL)).willReturn(null);//causing the email to be already found. So it's a working line.
+	   given(studentRepository.save(any())).willReturn(student);//denotes the answer
+	   given(studentRepository.findById(TEST_STUDENT_ID)).willReturn(Optional.ofNullable(student));//denotes the answer
 	//I don't understand this line yet. At all. One question I have is, does createNewStudent in StudentController happen?
 	    //no, doesn't look like it. So how does this work then?
 	    //one thing I'm seeing is that what this line says, the other file does. like, the other file is returning email found,
@@ -133,11 +136,10 @@ public class JUnitTestStudentController {
 
 			//this is 400 and it says because the email was already added.
 		// verify that return status = OK (value 200) 
-		//	assertEquals(200, response.getStatus());
-//			assertEquals(400, response.getStatus());
+			assertEquals(200, response.getStatus());
 			//that was from the given line, above
+
 		
-		// verify that returned data has non zero primary key
 		//it's not, it's choking, on the save line for some reason.
 		//I saw in the book to use the @AutoConfigureTestDatabase annotation but it didn't say where or how to use it.
 		
@@ -150,25 +152,18 @@ public class JUnitTestStudentController {
 		//it causes that other file to choke.
 		//so this next line, check the result - the result is that that method chokes and doesnt return anything
 		//reminder: I did change pom.xml like the book says to add h2...didn't help
-/*		Student result = fromJsonString(response.getContentAsString(), Student.class);
+			
+		// verify that returned data has non zero primary key
+		Student result = fromJsonString(response.getContentAsString(), Student.class);
 		assertNotEquals( 0  , result.getStudent_id());
 		
 		// verify that repository save method was called.
 		verify(studentRepository).save(any(Student.class));
-			
-		// do http GET for student 
-		response = mvc.perform(
-				MockMvcRequestBuilders
-			      .get("/student" )
-			      .accept(MediaType.APPLICATION_JSON))
-				.andReturn().getResponse();
-	
-		// verify that return status = OK (value 200) 
-		assertEquals(200, response.getStatus());
+
 		
 		// verify that returned data contains the added student 
 		Student rstudent = fromJsonString(response.getContentAsString(), Student.class);
-		boolean found = false;		
+/*			boolean found = false;		
 		//for (Student s : scheduleDTO.courses) {
 			if (rstudent.getStudent_id() == TEST_STUDENT_ID) {
 				found = true;
@@ -178,6 +173,30 @@ public class JUnitTestStudentController {
 		// verify that repository find method was called.
 		verify(studentRepository, times(1)).findByEmail(TEST_STUDENT_EMAIL);
 	*/
+		
+		
+		//now say it's there already, same test, but with a 400:
+		given(studentRepository.findByEmail(TEST_STUDENT_EMAIL)).willReturn(student);//causing the email to be already found. So it's a working line.
+		response = mvc.perform(
+				MockMvcRequestBuilders
+			      .post("/student")
+			   /*   .content(asJsonString(studentDTO))*/	
+			      .contentType(MediaType.APPLICATION_JSON)
+			   /*   .accept(MediaType.APPLICATION_JSON)	*/		)
+			.andReturn().getResponse();
+		assertEquals(400, response.getStatus());
+		//that was from the given line, above
+			
+		// do http GET for student 
+		response = mvc.perform(
+				MockMvcRequestBuilders
+			      .get("/student?id="+result.getStudent_id() )
+			      .accept(MediaType.APPLICATION_JSON))
+				.andReturn().getResponse();
+
+		// verify that return status = OK (value 200) 
+		assertEquals(200, response.getStatus());		
+		
 	}
 	private static String asJsonString(final Object obj) {
 		try {
