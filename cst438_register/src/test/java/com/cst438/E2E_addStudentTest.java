@@ -1,6 +1,7 @@
-/** End to end test for add Student
-* The reason there is an addStudent button on the Semester Page as well as an addStudent button on the AddStudent Page is that I wanted to know how to do it both ways, so both ways are working. 
-* In fact there was a bug on the page one that I fixed this iteration. 
+/** End to end test for add Student. Tests include adding a student, 
+ * not being able to due to duplicated email, not being able to because
+ *  the statusCode's not an integer, fixing that and then successfully 
+ *  adding a second student.
  * 
  */
 package com.cst438;
@@ -15,7 +16,7 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 
 /**
- * @author Arlon
+ * @author Arlon Arriola
  *
  */
 public class E2E_addStudentTest {
@@ -89,7 +90,9 @@ public class E2E_addStudentTest {
 			
 			assertEquals(toast_text,"DB row successfully added in student table.");
 			
-			//that's it I think, a round trip end-to-end add student test. Oh, wait maybe a failed email-repeats test:		
+			//that's a round trip end-to-end add student test. 
+
+			//Here is a failed email-repeats test:		
 			Thread.sleep(SLEEP_DURATION);
 			we = driver.findElement(By.id("add-student-button"));
 			we.click();
@@ -119,7 +122,7 @@ public class E2E_addStudentTest {
 			
 			assertEquals(toast_text,"DB row successfully added in student table.");//this is a different bug - why does it say this?
 			
-			//check for invalid integer:
+			//A test to check for invalid integer:
 			Thread.sleep(SLEEP_DURATION);
 			we = driver.findElement(By.id("add-student-button"));
 			we.click();
@@ -140,7 +143,7 @@ public class E2E_addStudentTest {
 			
 			assertEquals(toast_text,"The status code needs to be an integer");
 			
-			//backspace it and try again
+			//clear the invalid integer, make a new email too since it needs another email, it and try again
 			driver.findElement(By.id("new_student_statusCode_entry_field")).clear();
 			driver.findElement(By.id("new_student_statusCode_entry_field")).sendKeys("1001");
 			email_to_add="fido@fidosfood"+Math.pow(10,8)*Math.random()+".com";//don't forget to switch the email again
