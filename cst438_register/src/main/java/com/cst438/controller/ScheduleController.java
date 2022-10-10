@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,7 +28,7 @@ import com.cst438.domain.StudentRepository;
 import com.cst438.service.GradebookService;
 
 @RestController
-@CrossOrigin(origins = {"http://localhost:3000","http://localhost:8080", "https://registerf-cst438.herokuapp.com/"})
+@CrossOrigin(origins = {"http://localhost:3000","http://localhost:3000/","http://localhost:8080", "https://registerf-cst438.herokuapp.com/"})
 public class ScheduleController {
 	
 	
@@ -47,9 +49,14 @@ public class ScheduleController {
 	 * get current schedule for student.
 	 */
 	@GetMapping("/schedule")
-	public ScheduleDTO getSchedule( @RequestParam("year") int year, @RequestParam("semester") String semester ) {
+	public ScheduleDTO getSchedule( 
+				@RequestParam("year") int year
+				, @RequestParam("semester") String semester
+				,@AuthenticationPrincipal OAuth2User principal
+	) {
 		System.out.println("/schedule called.");
-		String student_email = "test@csumb.edu";   // student's email 
+		//String student_email = "test@csumb.edu";   // student's email 
+		String student_email = principal.getAttribute("email");   // student's email 
 		
 		Student student = studentRepository.findByEmail(student_email);
 		if (student != null) {
