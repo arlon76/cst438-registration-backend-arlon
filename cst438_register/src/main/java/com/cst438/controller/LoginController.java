@@ -22,7 +22,7 @@ public class LoginController {
 	@GetMapping("/user")
 	public String user (@AuthenticationPrincipal OAuth2User principal){
 		// used by front end to display user name.
-		System.out.println("Line 23 LoginController.java says: redirect string is: "+redirect_url);// That prints correct, http://localhost:3000
+		System.out.println("Line 25 LoginController.java says: redirect string is: "+redirect_url);// That prints correct, http://localhost:3000
 		//return "redirect:http://localhost:3000/semester";
 		return "redirect:"+redirect_url;
 		//return ""+redirect_url;
